@@ -1,5 +1,6 @@
 fun main() {
     print("$ ")
 
-    readln()
+    var input = readln()
+    println("invalid_command: command not found")
 }
