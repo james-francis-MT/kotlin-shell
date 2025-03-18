@@ -7,12 +7,20 @@ fun main() {
         val command = readln()
         val parts = command.split(" ", limit = 2)
 
-        if (command == "exit 0") {
-            exitProcess(0)
-        } else if (parts[0] == "echo") {
-            println(parts[1])
-        } else {
-            println("$command: command not found")
+        when (parts[0]) {
+            "exit" -> exitProcess(0)
+            "echo" -> println(parts[1])
+            "type" -> handleType(parts)
+            else -> println("$command: command not found")
         }
     }
+}
+
+fun handleType(parts: List<String>) {
+    val validCommands = setOf("echo", "exit", "type")
+    if (validCommands.contains(parts[1])) {
+        println("${parts[1]} is a shell builtin")
+        return
+    }
+    println("${parts[1]}: not found")
 }
