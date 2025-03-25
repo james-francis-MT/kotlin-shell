@@ -1,5 +1,6 @@
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
@@ -20,6 +21,7 @@ fun main() {
             "exit" -> exitProcess(0)
             "echo" -> println(args)
             "type" -> handleType(args)
+            "pwd" -> println(Paths.get("").toAbsolutePath().toString())
             else -> handleUnknown(cmd, args)
         }
     }
@@ -30,7 +32,7 @@ fun handleType(arg: String?) {
         println("Type command requires 1 argument")
         return
     }
-    val validCommands = setOf("echo", "exit", "type")
+    val validCommands = setOf("echo", "exit", "type", "pwd")
     if (validCommands.contains(arg)) {
         println("$arg is a shell builtin")
         return
