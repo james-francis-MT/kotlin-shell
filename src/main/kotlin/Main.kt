@@ -1,6 +1,7 @@
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.regex.Pattern
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -61,9 +62,23 @@ fun handleUnknown(command: String, args: String?) {
 class CurrentPath {
     private var currentPath: Path = Paths.get("").toAbsolutePath()
 
-    fun setPath(newPath: String?) {
-        if (newPath == null) {
-            throw Error()
+    fun setPath(inputPath: String?) {
+        if (inputPath == null) {
+            return
+        }
+        var newPath: String
+        val backPaths = Pattern
+            .compile(Regex.escape(".."))
+            .matcher(inputPath)
+            .results()
+            .count()
+        if (backPaths > 0) {
+            newPath = this.currentPath.toString()
+            for (i in 0..<backPaths) {
+                newPath = newPath.substringBeforeLast("/")
+            }
+        } else {
+            newPath = inputPath.replace(".", this.currentPath.toString())
         }
         val path = Path(newPath)
         if (path.exists()) {
