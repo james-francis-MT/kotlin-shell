@@ -2,6 +2,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.system.exitProcess
@@ -9,6 +10,7 @@ import kotlin.system.exitProcess
 val pathList = System.getenv("PATH").split(":").filter { Files.exists(Path(it)) }
 
 fun main() {
+    val path = CurrentPath()
     while (true) {
         print("$ ")
 
@@ -21,7 +23,8 @@ fun main() {
             "exit" -> exitProcess(0)
             "echo" -> println(args)
             "type" -> handleType(args)
-            "pwd" -> println(Paths.get("").toAbsolutePath().toString())
+            "pwd" -> println(path.getPathString())
+            "cd" -> path.setPath(args)
             else -> handleUnknown(cmd, args)
         }
     }
@@ -32,7 +35,7 @@ fun handleType(arg: String?) {
         println("Type command requires 1 argument")
         return
     }
-    val validCommands = setOf("echo", "exit", "type", "pwd")
+    val validCommands = setOf("echo", "exit", "type", "pwd", "cd")
     if (validCommands.contains(arg)) {
         println("$arg is a shell builtin")
         return
@@ -53,6 +56,26 @@ fun handleUnknown(command: String, args: String?) {
         return
     }
     println("$command: command not found")
+}
+
+class CurrentPath {
+    private var currentPath: Path = Paths.get("").toAbsolutePath()
+
+    fun setPath(newPath: String?) {
+        if (newPath == null) {
+            throw Error()
+        }
+        val path = Path(newPath)
+        if (path.exists()) {
+            this.currentPath = path.toAbsolutePath()
+        } else {
+            println("cd: $newPath: No such file or directory")
+        }
+    }
+
+    fun getPathString(): String {
+        return this.currentPath.toString()
+    }
 }
 
 fun pathMatch(arg: String): Path? {
