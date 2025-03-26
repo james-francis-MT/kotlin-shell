@@ -1,14 +1,12 @@
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
-import java.util.regex.Pattern
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.system.exitProcess
 
-val pathList = System.getenv("PATH").split(":").filter { Files.exists(Path(it)) }
+val PATH_LIST = System.getenv("PATH").split(":").filter { Files.exists(Path(it)) }
+val HOME: String = System.getenv("HOME")
 
 fun main() {
     val path = CurrentPath()
@@ -59,42 +57,8 @@ fun handleUnknown(command: String, args: String?) {
     println("$command: command not found")
 }
 
-class CurrentPath {
-    private var currentPath: Path = Paths.get("").toAbsolutePath()
-
-    fun setPath(inputPath: String?) {
-        if (inputPath == null) {
-            return
-        }
-        var newPath: String
-        val backPaths = Pattern
-            .compile(Regex.escape(".."))
-            .matcher(inputPath)
-            .results()
-            .count()
-        if (backPaths > 0) {
-            newPath = this.currentPath.toString()
-            for (i in 0..<backPaths) {
-                newPath = newPath.substringBeforeLast("/")
-            }
-        } else {
-            newPath = inputPath.replace(".", this.currentPath.toString())
-        }
-        val path = Path(newPath)
-        if (path.exists()) {
-            this.currentPath = path.toAbsolutePath()
-        } else {
-            println("cd: $newPath: No such file or directory")
-        }
-    }
-
-    fun getPathString(): String {
-        return this.currentPath.toString()
-    }
-}
-
 fun pathMatch(arg: String): Path? {
-    for (path in pathList) {
+    for (path in PATH_LIST) {
         val filesAtPath = Path(path).listDirectoryEntries()
         val match = filesAtPath.find { it.name == arg }
         if (match != null) {
